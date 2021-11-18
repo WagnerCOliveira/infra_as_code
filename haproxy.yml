@@ -5,7 +5,20 @@
     package:
       name: haproxy
       state: present
-  - name:
+  - name: Garantindo Configuração
     copy:
       src: /root/playbooks/files/haproxy.cfg
       dest: /etc/haproxy
+    register: config
+  - debug:
+      msg: '{{ config }}'
+  - name: Reiniciando Serviço
+    service:
+      name: haproxy
+      state: reloaded
+    when: config.changed
+  - name: Garantindo Serviço
+    service:
+      name: haproxy
+      state: started
+      enabled: yes
