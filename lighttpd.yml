@@ -16,7 +16,7 @@
     when: ansible_distribution|lower == 'centos'
   - name: Garantindo LigHttpd
     package:
-      name: lighttpd
+      name: [ 'lighttpd', 'git']
       state: present
   - name: Garantindo configurações
     template:
@@ -42,3 +42,13 @@
       name: lighttpd
       state: started
       enabled: yes
+  - name: Removendo arquivos de /srv/www/html
+    shell: 'find /srv/www/html/ -delete -mindepth 1'
+  - name: Provisionando site de exemplo
+    git:
+      repo: http://172.27.11.10:3000/devops/site.git
+      dest: /srv/www/html
+      force: yes
+  - name: Garantindo contexto de /srv/www/html
+    command: 'restorecon -R /srv/www/html/'
+    when: ansible_distribution|lower == 'centos'
