@@ -1,0 +1,21 @@
+- hosts: docker
+  become: yes
+  tasks:
+  - name: Garantindo o epel-release em CentOS
+    package:
+      name: epel-release
+      state: present
+    when: ansible_distribution|lower == 'centos'
+  - name: Garantindo LigHttpd
+    package:
+      name: lighttpd
+      state: present
+  - name: Garantindo configurações
+    copy:
+      src: '{{ item }}'
+      dest: /etc/lighttpd
+      owner: root
+      group: root
+    loop:
+    - /root/playbooks/files/lighttpd.conf
+    - /root/playbooks/files/mime-types.conf
