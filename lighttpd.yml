@@ -27,6 +27,17 @@
     loop:
     - /root/playbooks/files/lighttpd.conf
     - /root/playbooks/files/mime-types.conf
+    register: config
+  - name: Garantindo configurações de proxy
+    blockinfile:
+      path: /etc/lighttpd/proxy.conf
+      create: yes
+      block: |
+        $SERVER["socket"] == ":8080" {
+            proxy.server = ( "" => ( ( "host" => "192.168.10.10", "port" => "80" )))
+        }
+      insertafter: '# Configuracoes do Ansible'
+    register: proxy
   - name: Garatindo Diretórios
     file:
       path: '{{ item }}'
@@ -37,6 +48,11 @@
     - /srv/www/html
     - /var/cache/lighttpd
     - /var/logs/lighttpd
+  - name: Reiniciando Lighttpd para aplicar configurações
+    service:
+      name: lighttpd
+      state: restarted
+    when: config.changed or proxy.changed
   - name: Garantindo Serviço
     service:
       name: lighttpd
@@ -52,3 +68,15 @@
   - name: Garantindo contexto de /srv/www/html
     command: 'restorecon -R /srv/www/html/'
     when: ansible_distribution|lower == 'centos'
+  - name: Testando conexao com load balancer
+    uri:
+      url: http://172.27.11.20
+      status_code: [200, 302, 304]
+    register: response
+    delegate_to: localhost
+    run_once: yes
+#  - name: Verificando status da conexão
+#    fail:
+#      msg: '[{{ response.status }}] - Load balancer com problemas'
+#    run_once: yes
+#    when: response.status == 200
