@@ -1,0 +1,42 @@
+- hosts: docker
+  become: yes
+  tasks:
+  - name: Removendo pacotes antigos
+    package:
+      name: ['docker', 'docker-engine', 'docker-io', 'containerd', 'runc', 'docker-client', 'docker-client-latest', 'docker-common', 'docker-latest', 'docker-latest-logrotate', 'docker-logrotate']
+      state: absent
+  - name: Cloco CentOS
+    block:
+    - name: Garantindo Repositório
+      yum_repository:
+        name: docker-ce
+        baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+        description: Docker CE Stable
+        file: docker-ce
+        gpgcheck: no
+    when: ansible_distribution|lower == 'centos'
+  - name: Bloco Debian
+    block:
+    - name: Garantindo pré-dependências
+      package:
+        name: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
+        state: present
+    - name:
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+    - name: Garantindo repositório
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable"
+        state: present
+        filename: docker-ce
+    when: ansible_distribution|lower == 'debian'
+  - name: Garantindo Docker Ce
+    package:
+      name: docker-ce
+      state: present
+  - name: Garantindo Serviço do docker
+    service:
+      name: docker
+      state: started
+      enabled: yes
