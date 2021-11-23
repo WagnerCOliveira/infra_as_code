@@ -1,0 +1,53 @@
+---
+# tasks file for lighttpd
+- name: Incluindo variaveis
+  include_vars: '{{ ansible_distribution|lower }}.yml'
+- name: Iniciando Tarefas
+  include_tasks: '{{ ansible_distribution|lower }}.yml'  
+- name: Garantindo LigHttpd
+  package:
+    name: [ 'lighttpd', 'git']
+    state: present
+- name: Garantindo lighttpd.conf
+  template:
+    src: lighttpd.conf
+    dest: /etc/lighttpd
+    owner: root
+    group: root
+- name: Garantindo mime-types.conf
+  copy:
+    src: mime-types.conf
+    dest: /etc/lighttpd
+    owner: root
+    group: root
+  register: config
+- name: Garantindo configurações de proxy
+  blockinfile:
+    path: /etc/lighttpd/proxy.conf
+    create: yes
+    block: |
+      $SERVER["socket"] == ":8080" {
+          proxy.server = ( "" => ( ( "host" => "192.168.10.10", "port" => "80" )))
+      }
+    insertafter: '# Configuracoes do Ansible'
+  register: proxy
+- name: Garatindo Diretórios
+  file:
+    path: '{{ item }}'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    state: directory
+  loop:
+  - /srv/www/html
+  - /var/cache/lighttpd
+  - /var/logs/lighttpd
+- name: Reiniciando Lighttpd para aplicar configurações
+  service:
+    name: lighttpd
+    state: restarted
+  when: config.changed or proxy.changed
+- name: Garantindo Serviço
+  service:
+    name: lighttpd
+    state: started
+    enabled: yes

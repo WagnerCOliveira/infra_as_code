@@ -1,0 +1,17 @@
+---
+# tasks file for docker
+- name: Removendo pacotes antigos
+  package:
+    name: '{{ packages_remove }}'
+    state: absent
+- name: Tarefas especificas
+  include_tasks: '{{ ansible_distribution|lower }}.yml'
+- name: Garantindo Docker Ce
+  package:
+    name: docker-ce
+    state: present
+- name: Garantindo Serviço do docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
