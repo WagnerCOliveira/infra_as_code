@@ -1,8 +1,54 @@
 # tasks file for publicaSite
 ---
+- name: Instalando pip docker, docker-compose
+  pip:
+    name: [ "docker", "docker-compose" ]
+
+- name: Criando Diretório
+  file:
+    path: /var/www/site
+    owner: wco
+    group: wco
+    state: directory
+
+- name: Removendo arquivos de /srv/www/site
+  shell: 'find /var/www/site/ -delete -mindepth 1'
+
 - name: Clone Repos Git
+  become: false
   git:
     repo: git@github.com:WagnerCOliveira/site.git
-    dest: /home/wco
-    single_branch: yes
-    version: main
+    dest: /var/www/site
+    force: yes
+  register: output
+- debug:
+    var: output
+
+- name: Criando link simbolico conf nginx
+  file:
+    src: "/var/www/site/nginx/www.wagneroliveira.eti.br.conf"
+    dest: "/etc/nginx/conf.d/www.wagneroliveira.eti.br.conf"
+    state: link
+
+- name: Restart Nginx
+  systemd:
+    name: nginx
+    state: restarted
+
+- name: Build Imagem
+  docker_image:
+    name: wagnercoliveira/site
+    build:
+      path: /var/www/site
+    state: present
+  register: output
+- debug:
+    var: output
+
+- name: Subindo Containers
+  docker_compose:
+    project_src: /var/www/site/docker
+  register: output
+- debug:
+    var: output
+
