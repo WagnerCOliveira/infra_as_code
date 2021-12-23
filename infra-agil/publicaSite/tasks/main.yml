@@ -1,2 +1,8 @@
----
 # tasks file for publicaSite
+---
+- name: Clone Repos Git
+  git:
+    repo: git@github.com:WagnerCOliveira/site.git
+    dest: /home/wco
+    single_branch: yes
+    version: main
