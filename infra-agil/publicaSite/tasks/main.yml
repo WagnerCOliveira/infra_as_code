@@ -20,9 +20,6 @@
     repo: git@github.com:WagnerCOliveira/site.git
     dest: /var/www/site
     force: yes
-  register: output
-- debug:
-    var: output
 
 - name: Criando link simbolico conf nginx
   file:
@@ -41,14 +38,8 @@
     build:
       path: /var/www/site
     state: present
-  register: output
-- debug:
-    var: output
 
 - name: Subindo Containers
   docker_compose:
     project_src: /var/www/site/docker
-  register: output
-- debug:
-    var: output
 
