@@ -1,0 +1,14 @@
+# vars file for docker
+---
+packages_remove:
+- docker 
+- docker-engine 
+- docker-io 
+- containerd 
+- runc 
+- docker-client 
+- docker-client-latest 
+- docker-common 
+- docker-latest 
+- docker-latest-logrotate 
+- docker-logrotate

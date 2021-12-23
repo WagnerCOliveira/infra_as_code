@@ -1,0 +1,27 @@
+# tasks file for zabbix-agent
+---
+- name: Incluindo Tasks
+  include_tasks: '{{ ansible_distribution|lower }}.yml'
+- name: Tratando Instalação Zabbix Agent
+  package:
+    name: zabbix-agent
+    state: present
+- name: Garantindo Memcached, Mariadb em interface privada
+  lineinfile:
+    path: /etc/zabbix/zabbix_agentd.conf
+    line: '{{ item.line }}'
+    regex: '{{ item.regex }}'
+  loop:
+  - line: ServerActive=172.27.11.120
+    regex: ServerActive=
+  - line: Server=172.27.11.120
+    regex: Server=
+  - line: EnableRemoteCommands=1    
+    regex: ^# EnableRemoteCommands=0
+- name: Tratando permições do usuário Zabbix ao Docker
+  shell: 'usermod -aG docker zabbix'
+- name: Tratando Inicilização Zabbix-Agent
+  service:
+    name: zabbix-agent
+    state: restarted
+    enabled: yes

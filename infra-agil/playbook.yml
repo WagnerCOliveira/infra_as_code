@@ -1,0 +1,6 @@
+- hosts: docker
+  become: yes
+  roles:
+  - lighttpd
+  - docker
+  - zabbix-agent

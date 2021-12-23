@@ -1,0 +1,9 @@
+# tasks file for zabbix-agent
+---
+- name: Tratando copia LLD docker host
+  copy:
+    src: docker_host.conf
+    dest: /etc/zabbix/zabbix_agentd.conf.d/
+    owner: zabbix
+    group: zabbix
+    mode: '0644'

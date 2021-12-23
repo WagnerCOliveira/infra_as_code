@@ -1,0 +1,22 @@
+# tasks file for zabbix-agent
+---
+- name: Tratando Instalação de repositório Zabbix Agent
+  yum_repository:
+    name: zabbix-agent
+    description: Zabbix repo
+    file: external_repos
+    baseurl: https://repo.zabbix.com/zabbix/5.4/rhel/8/x86_64/
+    state: present
+    gpgcheck: no
+    
+- name: Tratando Instalação Zabbix Agent
+  package:
+    name: zabbix-agent
+    state: present
+- name: Tratando copia LLD docker host
+  copy:
+    src: docker_host.conf
+    dest: /etc/zabbix/zabbix_agentd.d
+    owner: zabbix
+    group: zabbix
+    mode: '0644'
